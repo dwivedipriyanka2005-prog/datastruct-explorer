@@ -116,6 +116,15 @@ function ArrayScope() {
     setNotice(null);
   }, [baseArray]);
 
+  const clearRun = useCallback(() => {
+    setPlaying(false);
+    setSteps(null);
+    setCurrent(0);
+    committed.current = false;
+    setError(null);
+    setNotice(null);
+  }, []);
+
   const start = (built: Step[], snapshot: number[]) => {
     setBaseArray(snapshot);
     setSteps(built);
@@ -146,7 +155,7 @@ function ArrayScope() {
       }
       values.push(n);
     }
-    resetRun();
+    clearRun();
     setArray(values);
     setBaseArray(values);
     setNotice(`Array created with ${values.length} element${values.length === 1 ? "" : "s"}.`);
@@ -169,7 +178,7 @@ function ArrayScope() {
       return;
     }
     const values = Array.from({ length: n }, () => lo + Math.floor(Math.random() * (hi - lo + 1)));
-    resetRun();
+    clearRun();
     setArray(values);
     setBaseArray(values);
     setManual(values.join(", "));
@@ -177,7 +186,7 @@ function ArrayScope() {
   };
 
   const clearArray = () => {
-    resetRun();
+    clearRun();
     setArray([]);
     setBaseArray([]);
     setManual("");
@@ -407,7 +416,7 @@ function ArrayScope() {
                       key={k}
                       onClick={() => {
                         setAlgo(k);
-                        resetRun();
+                        clearRun();
                       }}
                       aria-pressed={algo === k}
                       className={`h-9 rounded-lg font-mono text-[11px] transition-colors ${
