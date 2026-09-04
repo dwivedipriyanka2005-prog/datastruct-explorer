@@ -49,7 +49,7 @@ export const ALGO_META: Record<
   insertion: { label: "Insertion Sort", group: "sort", time: "O(n²)", space: "O(1)" },
 };
 
-export const isSorted = (a: number[]) => a.every((v, i) => i === 0 || a[i - 1] <= v);
+export const isSorted = (a: number[]) => a.every((v, i) => i === 0 || a[i - 1]! <= v);
 
 const mark = (entries: Array<[number, HighlightKind]>): Record<number, HighlightKind> =>
   Object.fromEntries(entries) as Record<number, HighlightKind>;
