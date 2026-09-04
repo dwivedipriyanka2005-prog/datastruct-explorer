@@ -13,6 +13,9 @@ import {
   insertionSortSteps,
   isSorted,
   linearSearchSteps,
+  reverseSteps,
+  rotateSteps,
+  sliceSteps,
   selectionSortSteps,
   traverseSteps,
   updateSteps,
@@ -43,6 +46,7 @@ export const Route = createFileRoute("/")({
 
 const MAX_SIZE = 20;
 const OPERATIONS: AlgoKey[] = ["access", "update", "insert", "delete", "traverse"];
+const ADVANCED: AlgoKey[] = ["reverse", "rotate", "slice"];
 const SEARCHES: AlgoKey[] = ["linear", "binary"];
 const SORTS: AlgoKey[] = ["bubble", "selection", "insertion"];
 
@@ -64,6 +68,7 @@ function ArrayScope() {
   const [opIndex, setOpIndex] = useState("0");
   const [opValue, setOpValue] = useState("42");
   const [target, setTarget] = useState("4");
+  const [sliceEnd, setSliceEnd] = useState("3");
 
   const [steps, setSteps] = useState<Step[] | null>(null);
   const [current, setCurrent] = useState(0);
@@ -254,6 +259,34 @@ function ArrayScope() {
       case "traverse":
         start(traverseSteps(a), a);
         return;
+      case "reverse":
+        start(reverseSteps(a), a);
+        return;
+      case "rotate": {
+        if (val === null) {
+          setError("Rotate amount must be a whole number.");
+          return;
+        }
+        start(rotateSteps(a, val), a);
+        return;
+      }
+      case "slice": {
+        const end = parseIntStrict(sliceEnd);
+        if (idx === null || end === null) {
+          setError("Slice start and end must be whole numbers.");
+          return;
+        }
+        if (idx < 0 || idx >= a.length) {
+          setError(`Slice start must be between 0 and ${a.length - 1}.`);
+          return;
+        }
+        if (end <= idx || end > a.length) {
+          setError(`Slice end must be greater than the start and at most ${a.length}.`);
+          return;
+        }
+        start(sliceSteps(a, idx, end), a);
+        return;
+      }
       case "linear": {
         if (tgt === null) {
           setError("Search target must be a whole number.");
@@ -318,8 +351,11 @@ function ArrayScope() {
     [algo, step],
   );
 
-  const needsIndex = ["access", "update", "insert", "delete"].includes(algo);
-  const needsValue = ["update", "insert"].includes(algo);
+  const needsIndex = ["access", "update", "insert", "delete", "slice"].includes(algo);
+  const needsValue = ["update", "insert", "rotate"].includes(algo);
+  const needsSliceEnd = algo === "slice";
+  const indexLabel = algo === "slice" ? "start" : "index";
+  const valueLabel = algo === "rotate" ? "positions" : "value";
   const needsTarget = ["linear", "binary"].includes(algo);
 
   return (
@@ -403,6 +439,7 @@ function ArrayScope() {
             </p>
             {[
               ["operations", OPERATIONS],
+              ["advanced", ADVANCED],
               ["search", SEARCHES],
               ["sort", SORTS],
             ].map(([label, keys]) => (
@@ -432,11 +469,11 @@ function ArrayScope() {
               </div>
             ))}
 
-            {(needsIndex || needsValue || needsTarget) && (
+            {(needsIndex || needsValue || needsTarget || needsSliceEnd) && (
               <div className="mt-2 grid grid-cols-2 gap-2">
                 {needsIndex && (
                   <label className="block">
-                    <span className="font-mono text-[10px] text-mist">index</span>
+                    <span className="font-mono text-[10px] text-mist">{indexLabel}</span>
                     <input
                       value={opIndex}
                       onChange={(e) => setOpIndex(e.target.value)}
@@ -447,11 +484,22 @@ function ArrayScope() {
                 )}
                 {needsValue && (
                   <label className="block">
-                    <span className="font-mono text-[10px] text-mist">value</span>
+                    <span className="font-mono text-[10px] text-mist">{valueLabel}</span>
                     <input
                       value={opValue}
                       onChange={(e) => setOpValue(e.target.value)}
                       aria-label="Operation value"
+                      className="mt-1 h-9 w-full rounded-lg bg-panel px-2.5 font-mono text-[13px] ring-1 ring-border outline-none focus:ring-primary"
+                    />
+                  </label>
+                )}
+                {needsSliceEnd && (
+                  <label className="block">
+                    <span className="font-mono text-[10px] text-mist">end (exclusive)</span>
+                    <input
+                      value={sliceEnd}
+                      onChange={(e) => setSliceEnd(e.target.value)}
+                      aria-label="Slice end index"
                       className="mt-1 h-9 w-full rounded-lg bg-panel px-2.5 font-mono text-[13px] ring-1 ring-border outline-none focus:ring-primary"
                     />
                   </label>
