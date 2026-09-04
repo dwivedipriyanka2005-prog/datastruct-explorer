@@ -102,7 +102,7 @@ export function updateSteps(a: number[], index: number, value: number): Step[] {
 
 export function insertSteps(a: number[], index: number, value: number): Step[] {
   const steps: Step[] = [];
-  const work = [...a, a.length ? a[a.length - 1] : value];
+  const work: number[] = [...a, a.length ? a[a.length - 1]! : value];
   steps.push({
     array: [...a],
     highlights: mark(a.length ? [[Math.min(index, a.length - 1), "active"]] : []),
@@ -139,7 +139,7 @@ export function insertSteps(a: number[], index: number, value: number): Step[] {
 
 export function deleteSteps(a: number[], index: number): Step[] {
   const steps: Step[] = [];
-  const work = [...a];
+  const work: number[] = [...a];
   steps.push({
     array: [...a],
     highlights: mark([[index, "active"]]),
@@ -336,8 +336,8 @@ export function bubbleSortSteps(input: number[]): Step[] {
       });
       if (a[j]! > a[j + 1]!) {
         const tmp = a[j]!;
-        a[j]! = a[j + 1]!;
-        a[j + 1]! = tmp;
+        a[j] = a[j + 1]!;
+        a[j + 1] = tmp;
         swaps++;
         steps.push({
           array: [...a],
@@ -415,8 +415,8 @@ export function selectionSortSteps(input: number[]): Step[] {
     }
     if (minIdx !== i) {
       const tmp = a[i]!;
-      a[i]! = a[minIdx]!;
-      a[minIdx]! = tmp;
+      a[i] = a[minIdx]!;
+      a[minIdx] = tmp;
       swaps++;
       steps.push({
         array: [...a],
@@ -481,7 +481,7 @@ export function insertionSortSteps(input: number[]): Step[] {
         comparisons,
         swaps,
       });
-      a[j + 1]! = a[j]!;
+      a[j + 1] = a[j]!;
       swaps++;
       steps.push({
         array: [...a],
@@ -504,7 +504,7 @@ export function insertionSortSteps(input: number[]): Step[] {
         swaps,
       });
     }
-    a[j + 1]! = key;
+    a[j + 1] = key;
     steps.push({
       array: [...a],
       highlights: { ...sortedTo(i + 1), [j + 1]: "found" },
