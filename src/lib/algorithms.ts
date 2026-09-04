@@ -69,7 +69,7 @@ export function accessSteps(a: number[], index: number): Step[] {
     {
       array: [...a],
       highlights: mark([[index, "found"]]),
-      explanation: `Index ${index} contains the value ${a[index]}. Access completed in constant time.`,
+      explanation: `Index ${index} contains the value ${a[index]!}. Access completed in constant time.`,
       codeLine: 3,
       ...base,
     },
@@ -112,7 +112,7 @@ export function insertSteps(a: number[], index: number, value: number): Step[] {
     swaps: 0,
   });
   for (let k = a.length - 1; k >= index; k--) {
-    work[k + 1] = work[k];
+    work[k + 1] = work[k]!;
     steps.push({
       array: [...work],
       highlights: mark([
@@ -143,13 +143,13 @@ export function deleteSteps(a: number[], index: number): Step[] {
   steps.push({
     array: [...a],
     highlights: mark([[index, "active"]]),
-    explanation: `Removing the element ${a[index]} at index ${index}. Later elements shift one slot to the left.`,
+    explanation: `Removing the element ${a[index]!} at index ${index}. Later elements shift one slot to the left.`,
     codeLine: 2,
     comparisons: 0,
     swaps: 0,
   });
   for (let k = index; k < a.length - 1; k++) {
-    work[k] = work[k + 1];
+    work[k] = work[k + 1]!;
     steps.push({
       array: [...work],
       highlights: mark([
@@ -195,7 +195,7 @@ export function linearSearchSteps(a: number[], target: number): Step[] {
   let comparisons = 0;
   for (let i = 0; i < a.length; i++) {
     comparisons++;
-    const found = a[i] === target;
+    const found = a[i]! === target;
     steps.push({
       array: [...a],
       highlights: {
@@ -203,8 +203,8 @@ export function linearSearchSteps(a: number[], target: number): Step[] {
         [i]: (found ? "found" : "compare") as HighlightKind,
       },
       explanation: found
-        ? `a[${i}] = ${a[i]} matches the target ${target}.`
-        : `Comparing a[${i}] = ${a[i]} with the target ${target}. Not a match, moving right.`,
+        ? `a[${i}] = ${a[i]!} matches the target ${target}.`
+        : `Comparing a[${i}] = ${a[i]!} with the target ${target}. Not a match, moving right.`,
       codeLine: 3,
       comparisons,
       swaps: 0,
@@ -251,22 +251,22 @@ export function binarySearchSteps(a: number[], target: number): Step[] {
   };
 
   while (low <= high) {
-    const mid = Math.floor(low + (high - low) / 2);
+    const mid: number = Math.floor(low + (high - low) / 2);
     comparisons++;
     steps.push({
       array: [...a],
       highlights: rangeMarks(low, high, mid),
-      explanation: `Search space is [${low} … ${high}]. Midpoint is index ${mid} with value ${a[mid]}.`,
+      explanation: `Search space is [${low} … ${high}]. Midpoint is index ${mid} with value ${a[mid]!}.`,
       codeLine: 4,
       comparisons,
       swaps: 0,
       pointers: { low, high, mid },
     });
-    if (a[mid] === target) {
+    if (a[mid]! === target) {
       steps.push({
         array: [...a],
         highlights: mark([[mid, "found"]]),
-        explanation: `a[${mid}] = ${a[mid]} equals the target. Target ${target} found at index ${mid} after ${comparisons} comparison${comparisons === 1 ? "" : "s"}.`,
+        explanation: `a[${mid}] = ${a[mid]!} equals the target. Target ${target} found at index ${mid} after ${comparisons} comparison${comparisons === 1 ? "" : "s"}.`,
         codeLine: 5,
         comparisons,
         swaps: 0,
@@ -274,12 +274,12 @@ export function binarySearchSteps(a: number[], target: number): Step[] {
       });
       return steps;
     }
-    if (a[mid] < target) {
+    if (a[mid]! < target) {
       low = mid + 1;
       steps.push({
         array: [...a],
         highlights: rangeMarks(low, high),
-        explanation: `${a[mid]} < ${target}, so the target must be to the right. low moves to ${low}.`,
+        explanation: `${a[mid]!} < ${target}, so the target must be to the right. low moves to ${low}.`,
         codeLine: 6,
         comparisons,
         swaps: 0,
@@ -290,7 +290,7 @@ export function binarySearchSteps(a: number[], target: number): Step[] {
       steps.push({
         array: [...a],
         highlights: rangeMarks(low, high),
-        explanation: `${a[mid]} > ${target}, so the target must be to the left. high moves to ${high}.`,
+        explanation: `${a[mid]!} > ${target}, so the target must be to the left. high moves to ${high}.`,
         codeLine: 7,
         comparisons,
         swaps: 0,
@@ -329,18 +329,20 @@ export function bubbleSortSteps(input: number[]): Step[] {
       steps.push({
         array: [...a],
         highlights: { ...sortedFrom(i), [j]: "compare", [j + 1]: "compare" },
-        explanation: `Comparing a[${j}] = ${a[j]} with a[${j + 1}] = ${a[j + 1]}.`,
+        explanation: `Comparing a[${j}] = ${a[j]!} with a[${j + 1}] = ${a[j + 1]!}.`,
         codeLine: 3,
         comparisons,
         swaps,
       });
-      if (a[j] > a[j + 1]) {
-        [a[j], a[j + 1]] = [a[j + 1], a[j]];
+      if (a[j]! > a[j + 1]!) {
+        const tmp = a[j]!;
+        a[j]! = a[j + 1]!;
+        a[j + 1]! = tmp;
         swaps++;
         steps.push({
           array: [...a],
           highlights: { ...sortedFrom(i), [j]: "swap", [j + 1]: "swap" },
-          explanation: `${a[j + 1]} > ${a[j]}, so the pair is swapped. The larger value bubbles right.`,
+          explanation: `${a[j + 1]!} > ${a[j]!}, so the pair is swapped. The larger value bubbles right.`,
           codeLine: 4,
           comparisons,
           swaps,
@@ -384,7 +386,7 @@ export function selectionSortSteps(input: number[]): Step[] {
     steps.push({
       array: [...a],
       highlights: { ...sortedTo(i), [i]: "min" },
-      explanation: `Starting pass ${i + 1}. Assume index ${i} (value ${a[i]}) holds the minimum of the unsorted part.`,
+      explanation: `Starting pass ${i + 1}. Assume index ${i} (value ${a[i]!}) holds the minimum of the unsorted part.`,
       codeLine: 2,
       comparisons,
       swaps,
@@ -394,17 +396,17 @@ export function selectionSortSteps(input: number[]): Step[] {
       steps.push({
         array: [...a],
         highlights: { ...sortedTo(i), [minIdx]: "min", [j]: "compare" },
-        explanation: `Comparing a[${j}] = ${a[j]} with the current minimum a[${minIdx}] = ${a[minIdx]}.`,
+        explanation: `Comparing a[${j}] = ${a[j]!} with the current minimum a[${minIdx}] = ${a[minIdx]!}.`,
         codeLine: 4,
         comparisons,
         swaps,
       });
-      if (a[j] < a[minIdx]) {
+      if (a[j]! < a[minIdx]!) {
         minIdx = j;
         steps.push({
           array: [...a],
           highlights: { ...sortedTo(i), [minIdx]: "min" },
-          explanation: `New minimum found: a[${minIdx}] = ${a[minIdx]}.`,
+          explanation: `New minimum found: a[${minIdx}] = ${a[minIdx]!}.`,
           codeLine: 4,
           comparisons,
           swaps,
@@ -412,7 +414,9 @@ export function selectionSortSteps(input: number[]): Step[] {
       }
     }
     if (minIdx !== i) {
-      [a[i], a[minIdx]] = [a[minIdx], a[i]];
+      const tmp = a[i]!;
+      a[i]! = a[minIdx]!;
+      a[minIdx]! = tmp;
       swaps++;
       steps.push({
         array: [...a],
@@ -457,7 +461,7 @@ export function insertionSortSteps(input: number[]): Step[] {
   };
 
   for (let i = 1; i < n; i++) {
-    const key = a[i];
+    const key = a[i]!;
     steps.push({
       array: [...a],
       highlights: { ...sortedTo(i), [i]: "key" },
@@ -467,22 +471,22 @@ export function insertionSortSteps(input: number[]): Step[] {
       swaps,
     });
     let j = i - 1;
-    while (j >= 0 && a[j] > key) {
+    while (j >= 0 && a[j]! > key) {
       comparisons++;
       steps.push({
         array: [...a],
         highlights: { ...sortedTo(i), [j]: "compare" },
-        explanation: `a[${j}] = ${a[j]} is greater than the key ${key}, so it shifts one slot right.`,
+        explanation: `a[${j}] = ${a[j]!} is greater than the key ${key}, so it shifts one slot right.`,
         codeLine: 4,
         comparisons,
         swaps,
       });
-      a[j + 1] = a[j];
+      a[j + 1]! = a[j]!;
       swaps++;
       steps.push({
         array: [...a],
         highlights: { ...sortedTo(i), [j + 1]: "swap" },
-        explanation: `Shifted ${a[j + 1]} from index ${j} to index ${j + 1}.`,
+        explanation: `Shifted ${a[j + 1]!} from index ${j} to index ${j + 1}.`,
         codeLine: 5,
         comparisons,
         swaps,
@@ -494,13 +498,13 @@ export function insertionSortSteps(input: number[]): Step[] {
       steps.push({
         array: [...a],
         highlights: { ...sortedTo(i), [j]: "compare" },
-        explanation: `a[${j}] = ${a[j]} is not greater than the key ${key}. The insert position is index ${j + 1}.`,
+        explanation: `a[${j}] = ${a[j]!} is not greater than the key ${key}. The insert position is index ${j + 1}.`,
         codeLine: 4,
         comparisons,
         swaps,
       });
     }
-    a[j + 1] = key;
+    a[j + 1]! = key;
     steps.push({
       array: [...a],
       highlights: { ...sortedTo(i + 1), [j + 1]: "found" },
