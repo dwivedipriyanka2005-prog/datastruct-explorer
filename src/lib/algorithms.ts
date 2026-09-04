@@ -27,6 +27,9 @@ export type AlgoKey =
   | "insert"
   | "delete"
   | "traverse"
+  | "reverse"
+  | "rotate"
+  | "slice"
   | "linear"
   | "binary"
   | "bubble"
@@ -35,13 +38,16 @@ export type AlgoKey =
 
 export const ALGO_META: Record<
   AlgoKey,
-  { label: string; group: "operation" | "search" | "sort"; time: string; space: string }
+  { label: string; group: "operation" | "advanced" | "search" | "sort"; time: string; space: string }
 > = {
   access: { label: "Access", group: "operation", time: "O(1)", space: "O(1)" },
   update: { label: "Update", group: "operation", time: "O(1)", space: "O(1)" },
   insert: { label: "Insert", group: "operation", time: "O(n)", space: "O(1)" },
   delete: { label: "Delete", group: "operation", time: "O(n)", space: "O(1)" },
   traverse: { label: "Traverse", group: "operation", time: "O(n)", space: "O(1)" },
+  reverse: { label: "Reverse", group: "advanced", time: "O(n)", space: "O(1)" },
+  rotate: { label: "Rotate Left", group: "advanced", time: "O(n)", space: "O(1)" },
+  slice: { label: "Slice", group: "advanced", time: "O(k)", space: "O(k)" },
   linear: { label: "Linear Search", group: "search", time: "O(n)", space: "O(1)" },
   binary: { label: "Binary Search", group: "search", time: "O(log n)", space: "O(1)" },
   bubble: { label: "Bubble Sort", group: "sort", time: "O(n²)", space: "O(1)" },
@@ -186,6 +192,157 @@ export function traverseSteps(a: number[]): Step[] {
     comparisons: 0,
     swaps: 0,
   }));
+}
+
+
+/* ------------------------------ advanced ops ----------------------------- */
+
+export function reverseSteps(a: number[]): Step[] {
+  const steps: Step[] = [];
+  const work = [...a];
+  let swaps = 0;
+  steps.push({
+    array: [...work],
+    highlights: mark([[0, "low"], [work.length - 1, "high"]]),
+    explanation: `Reversing in place with two pointers: left = 0, right = ${work.length - 1}.`,
+    codeLine: 1,
+    comparisons: 0,
+    swaps,
+    pointers: { low: 0, high: work.length - 1 },
+  });
+  let i = 0;
+  let j = work.length - 1;
+  while (i < j) {
+    steps.push({
+      array: [...work],
+      highlights: mark([[i, "compare"], [j, "compare"]]),
+      explanation: `Preparing to swap a[${i}] = ${work[i]!} with a[${j}] = ${work[j]!}.`,
+      codeLine: 2,
+      comparisons: 0,
+      swaps,
+      pointers: { low: i, high: j },
+    });
+    const t = work[i]!;
+    work[i] = work[j]!;
+    work[j] = t;
+    swaps++;
+    steps.push({
+      array: [...work],
+      highlights: mark([[i, "swap"], [j, "swap"]]),
+      explanation: `Swapped. a[${i}] = ${work[i]!}, a[${j}] = ${work[j]!}.`,
+      codeLine: 3,
+      comparisons: 0,
+      swaps,
+      pointers: { low: i, high: j },
+    });
+    i++;
+    j--;
+  }
+  steps.push({
+    array: [...work],
+    highlights: mark(work.map((_, k) => [k, "sorted"] as [number, HighlightKind])),
+    explanation: `Reverse complete after ${swaps} swap${swaps === 1 ? "" : "s"}.`,
+    codeLine: 5,
+    comparisons: 0,
+    swaps,
+  });
+  return steps;
+}
+
+export function rotateSteps(a: number[], k: number): Step[] {
+  const n = a.length;
+  const steps: Step[] = [];
+  const shift = ((k % n) + n) % n;
+  let swaps = 0;
+  const work = [...a];
+  steps.push({
+    array: [...work],
+    highlights: {},
+    explanation:
+      shift === 0
+        ? `Rotating by ${k} on a size-${n} array is a full cycle — the array is unchanged.`
+        : `Rotating left by ${shift} position${shift === 1 ? "" : "s"} using ${shift} single-step rotations.`,
+    codeLine: 1,
+    comparisons: 0,
+    swaps,
+  });
+  for (let r = 0; r < shift; r++) {
+    const first = work[0]!;
+    steps.push({
+      array: [...work],
+      highlights: mark([[0, "key"]]),
+      explanation: `Rotation ${r + 1} of ${shift}: holding the first element ${first} aside.`,
+      codeLine: 2,
+      comparisons: 0,
+      swaps,
+    });
+    for (let m = 0; m < n - 1; m++) {
+      work[m] = work[m + 1]!;
+      swaps++;
+      steps.push({
+        array: [...work],
+        highlights: mark([[m, "swap"], [m + 1, "compare"]]),
+        explanation: `Shifting ${work[m]!} from index ${m + 1} to index ${m}.`,
+        codeLine: 4,
+        comparisons: 0,
+        swaps,
+      });
+    }
+    work[n - 1] = first;
+    steps.push({
+      array: [...work],
+      highlights: mark([[n - 1, "found"]]),
+      explanation: `Placing the held value ${first} at the end, index ${n - 1}.`,
+      codeLine: 5,
+      comparisons: 0,
+      swaps,
+    });
+  }
+  steps.push({
+    array: [...work],
+    highlights: mark(work.map((_, i) => [i, "sorted"] as [number, HighlightKind])),
+    explanation: `Rotation complete. Array is now [${work.join(", ")}].`,
+    codeLine: 7,
+    comparisons: 0,
+    swaps,
+  });
+  return steps;
+}
+
+export function sliceSteps(a: number[], start: number, end: number): Step[] {
+  const steps: Step[] = [];
+  const out: number[] = [];
+  steps.push({
+    array: [...a],
+    highlights: mark([[start, "low"], [Math.max(start, end - 1), "high"]]),
+    explanation: `Slicing [${start}, ${end}) — copying indices ${start} through ${end - 1} into a new array.`,
+    codeLine: 1,
+    comparisons: 0,
+    swaps: 0,
+  });
+  for (let i = start; i < end; i++) {
+    out.push(a[i]!);
+    steps.push({
+      array: [...a],
+      highlights: {
+        ...mark(a.slice(start, i).map((_, k) => [start + k, "range"] as [number, HighlightKind])),
+        [i]: "active" as HighlightKind,
+      },
+      explanation: `Copying a[${i}] = ${a[i]!} into the slice (${out.length} element${out.length === 1 ? "" : "s"} so far).`,
+      codeLine: 3,
+      comparisons: 0,
+      swaps: out.length,
+    });
+  }
+  steps.push({
+    array: [...out],
+    highlights: mark(out.map((_, i) => [i, "found"] as [number, HighlightKind])),
+    explanation: `Slice complete — the view now shows the extracted sub-array of ${out.length} element${out.length === 1 ? "" : "s"}.`,
+    codeLine: 5,
+    comparisons: 0,
+    swaps: out.length,
+  });
+  return steps;
 }
 
 /* ----------------------------------- searches ---------------------------------- */
