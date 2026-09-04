@@ -356,6 +356,8 @@ function ArrayScope() {
   const needsSliceEnd = algo === "slice";
   const indexLabel = algo === "slice" ? "start" : "index";
   const valueLabel = algo === "rotate" ? "positions" : "value";
+  const swapsLabel =
+    algo === "slice" ? "Copied" : ["insert", "delete", "rotate"].includes(algo) ? "Shifts" : "Swaps";
   const needsTarget = ["linear", "binary"].includes(algo);
 
   return (
@@ -534,7 +536,7 @@ function ArrayScope() {
             {[
               ["Size", String(view.length), "text-frost"],
               ["Comparisons", String(comparisons), "text-aurora2"],
-              ["Swaps", String(swaps), "text-aurora3"],
+              [swapsLabel, String(swaps), "text-aurora3"],
               ["Step", steps ? `${current + 1}/${steps.length}` : "0", "text-frost"],
               ["Algorithm", ALGO_META[algo].label, "text-aurora"],
             ].map(([label, value, tone]) => (
